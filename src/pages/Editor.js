@@ -181,7 +181,7 @@ const Editor = () => {
 
   const handleInitialStorySubmit = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/generateStory', {
+      const response = await fetch('https://ebd9-203-192-225-114.ngrok-free.app/api/generateStory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ story }),
@@ -202,7 +202,7 @@ const Editor = () => {
     setUserInput('');
   
     try {
-      const response = await fetch('http://localhost:5000/api/generateStory', {
+      const response = await fetch('https://ebd9-203-192-225-114.ngrok-free.app/api/generateStory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ story: updatedStory }),
@@ -244,7 +244,7 @@ const Editor = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('http://localhost:5000/api/generateImage', {
+      const response = await fetch('https://ebd9-203-192-225-114.ngrok-free.app/api/generateImage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: imagePrompt }),
