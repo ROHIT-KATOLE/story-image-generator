@@ -6,6 +6,7 @@ import Editor from './pages/Editor';
 import NotFound from './pages/NotFound';
 import AuthPage from './pages/AuthPage';
 import Settings from './pages/Settings';
+import StoriesPage from './pages/StoriesPage';
 import { AuthProvider } from './contexts/AuthContext';
 import Header from './components/Header';
 import GlobalStyle from './GlobalStyles';
@@ -23,6 +24,7 @@ function App() {
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/editor" element={<PrivateRoute><Editor /></PrivateRoute>} />
         <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+        <Route path="/stories" element={<PrivateRoute><StoriesPage /></PrivateRoute>} /> {/* Add StoriesPage route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

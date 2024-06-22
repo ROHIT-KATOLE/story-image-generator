@@ -1,4 +1,4 @@
-// src/components/Stories.js
+// src/Pages/Stories.js
 
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';

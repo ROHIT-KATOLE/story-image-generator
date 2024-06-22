@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+// src/pages/Dashboard.js
+import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { FaBook, FaChartLine, FaPlusCircle } from 'react-icons/fa';
 
 const DashboardWrapper = styled.div`
@@ -102,4 +102,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
