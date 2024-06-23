@@ -21,6 +21,7 @@ const StoryCardsWrapper = styled.div`
 const StoriesPage = () => {
   const [stories, setStories] = useState([]);
   const [selectedStory, setSelectedStory] = useState(null);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
   const { currentUser } = useAuth();
 
   useEffect(() => {
@@ -38,15 +39,31 @@ const StoriesPage = () => {
     }
   }, [currentUser]);
 
+  const openModal = (story) => {
+    setSelectedStory(story);
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedStory(null);
+    setModalIsOpen(false);
+  };
+
   return (
     <StoriesContainer>
       <h1>User Stories</h1>
       <StoryCardsWrapper>
         {stories.map(story => (
-          <StoryCard key={story.id} story={story} onClick={() => setSelectedStory(story)} />
+          <StoryCard key={story.id} story={story} onClick={() => openModal(story)} />
         ))}
       </StoryCardsWrapper>
-      {selectedStory && <StoryDetail story={selectedStory} />}
+      {selectedStory && (
+        <StoryDetail
+          story={selectedStory}
+          isOpen={modalIsOpen}
+          onClose={closeModal}
+        />
+      )}
     </StoriesContainer>
   );
 };

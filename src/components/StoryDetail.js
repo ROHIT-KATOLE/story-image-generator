@@ -1,29 +1,7 @@
 // src/components/StoryDetail.js
 import React from 'react';
+import Modal from 'react-modal';
 import styled from 'styled-components';
-
-const Overlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-`;
-
-const Modal = styled.div`
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  max-width: 80%;
-  max-height: 80%;
-  overflow-y: auto;
-  position: relative;
-`;
 
 const CloseButton = styled.button`
   position: absolute;
@@ -55,27 +33,43 @@ const Image = styled.img`
   margin-top: 10px;
 `;
 
-const StoryDetail = ({ story, onClose }) => {
+const StoryDetail = ({ story, isOpen, onClose }) => {
   const { title, content, images } = story;
   const contentArray = content.split('\n');
 
   return (
-    <Overlay onClick={onClose}>
-      <Modal onClick={(e) => e.stopPropagation()}>
-        <CloseButton onClick={onClose}>&times;</CloseButton>
-        <Title>{title}</Title>
-        <Content>
-          {contentArray.map((line, index) => (
-            <React.Fragment key={index}>
-              <p>{line}</p>
-              {images[index] && <Image src={images[index]} alt={`Story image ${index + 1}`} />}
-            </React.Fragment>
-          ))}
-        </Content>
-      </Modal>
-    </Overlay>
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={onClose}
+      style={{
+        overlay: {
+          backgroundColor: 'rgba(0, 0, 0, 0.75)'
+        },
+        content: {
+          position: 'relative',
+          margin: 'auto',
+          width: '80%',
+          height: '80%',
+          backgroundColor: 'white',
+          padding: '20px',
+          borderRadius: '8px',
+          overflowY: 'auto',
+        }
+      }}
+      contentLabel="Story Detail Modal"
+    >
+      <CloseButton onClick={onClose}>&times;</CloseButton>
+      <Title>{title}</Title>
+      <Content>
+        {contentArray.map((line, index) => (
+          <React.Fragment key={index}>
+            <p>{line}</p>
+            {images[index] && <Image src={images[index]} alt={`Story image ${index + 1}`} />}
+          </React.Fragment>
+        ))}
+      </Content>
+    </Modal>
   );
 };
 
 export default StoryDetail;
-

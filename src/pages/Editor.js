@@ -208,7 +208,7 @@ const Editor = () => {
         body: JSON.stringify({ story: updatedStory }),
       });
       const data = await response.json();
-      const newStory = `${updatedStory}\n\nAssistant:\n${data.story}`;
+      const newStory = `${updatedStory}\n\n${data.story}`;
       setStory(newStory);
       await saveStory(currentUser.uid, newStory, imageUrls);
     } catch (error) {
