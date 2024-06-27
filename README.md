@@ -38,8 +38,8 @@ This project is a Firebase-based application that allows users to authenticate v
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/your-username/firebase-stories-app.git
-    cd firebase-stories-app
+    git clone https://github.com/your-username/story-image-generator.git
+    cd story-image-generator
     ```
 
 2. Install dependencies:
