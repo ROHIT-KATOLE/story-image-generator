@@ -75,11 +75,12 @@ This project is a Firebase-based application that allows users to authenticate v
 ### Authentication
 
 - **Sign in with Google:**
-  ```javascript
+```javascript
   import { signInWithGoogle } from './firebase';
 
   const user = await signInWithGoogle();
   console.log(user);
+```
 
 - **Register with Email and Password:**
 ```javascript
@@ -146,22 +147,27 @@ const stories = await fetchAllStories(userId);
 console.log(stories);
 ```
 
+
+
 ## Firebase Configuration
 Make sure to configure Firebase with your project details as shown in the Installation section.
+
+
 
 ## API Documentation
 The following Firebase functions are available:
 
-signInWithGoogle(): Sign in with Google.
-registerWithEmailAndPassword(email, password, username): Register a new user with email and password.
-loginWithEmailAndPassword(email, password): Login with email and password.
-logout(): Logout the current user.
-saveStory(userId, storyContent, imageUrl): Save a story and associated images.
-saveNewStory(userId, title, storyContent, imageUrls): Save a new story with title and content.
-fetchImages(userId, storyId): Fetch images for a specific story.
-fetchStoryFromStorage(userId, storyId): Fetch a story from Firebase Storage.
-fetchAllStories(userId): Fetch all stories for a user.
-Contributing
+- signInWithGoogle(): Sign in with Google.
+- registerWithEmailAndPassword(email, password, username): Register a new user with email and password.
+- loginWithEmailAndPassword(email, password): Login with email and password.
+- logout(): Logout the current user.
+- saveStory(userId, storyContent, imageUrl): Save a story and associated images.
+- saveNewStory(userId, title, storyContent, imageUrls): Save a new story with title and content.
+- fetchImages(userId, storyId): Fetch images for a specific story.
+- fetchStoryFromStorage(userId, storyId): Fetch a story from Firebase Storage.
+- fetchAllStories(userId): Fetch all stories for a user.
+
+## Contributing
 Contributions are welcome! Please open an issue or submit a pull request.
 
 ## License
