@@ -16,7 +16,6 @@ This project is a Firebase-based application that allows users to authenticate v
   - [Firebase Configuration](#firebase-configuration)
   - [API Documentation](#api-documentation)
   - [Contributing](#contributing)
-  - [License](#license)
   
 ## Features
 
@@ -169,6 +168,3 @@ The following Firebase functions are available:
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request.
-
-## License
-This project is licensed under the MIT License. See the LICENSE file for details.
