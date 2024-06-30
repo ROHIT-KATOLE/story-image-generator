@@ -1,12 +1,8 @@
 import React from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import Carousel from 'react-bootstrap/Carousel';
 import AnimatedButton from '../components/AnimatedButton';
-import homeImage from '../assets/5.png';
-import image1 from '../assets/10.png';
-import image2 from '../assets/11.png';
-import image3 from '../assets/12.png';
+import videoBg from '../assets/Gura Yuri Camp.mp4'; // Your video file path
 
 const fadeIn = keyframes`
   from {
@@ -18,16 +14,16 @@ const fadeIn = keyframes`
 `;
 
 const HomeWrapper = styled.div`
+  position: relative; /* Ensure positioning context for absolutely positioned children */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
   padding: 20px;
-  background: url(${homeImage}) no-repeat center center;
-  background-size: cover;
-  min-height: 100vh;
+  min-height: 100vh; /* Minimum viewport height */
   color: #ffffff;
+  overflow: hidden; /* Hide overflow to prevent scroll bars */
   animation: ${fadeIn} 1.5s ease-in-out;
 
   @media (max-width: 768px) {
@@ -56,10 +52,16 @@ const Description = styled.p`
   }
 `;
 
-const CarouselWrapper = styled.div`
-  width: 100%;
-  max-width: 800px;
-  margin: 20px 0;
+const VideoBackground = styled.video`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  z-index: -1;
 `;
 
 const Home = () => {
@@ -67,6 +69,10 @@ const Home = () => {
 
   return (
     <HomeWrapper>
+      <VideoBackground autoPlay loop muted>
+        <source src={videoBg} type="video/mp4" />
+        Your browser does not support the video tag.
+      </VideoBackground>
       <Title>Welcome to the Interactive Story Generator!</Title>
       <Description>
         Create your own stories and see them come to life with AI-generated images. Whether you're a gamer or a creative writer, our tool provides a fun and engaging way to bring your ideas to life.
