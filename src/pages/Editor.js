@@ -7,6 +7,7 @@ const EditorWrapper = styled.div`
   display: flex;
   flex-direction: column;
   padding: 20px;
+  padding-top: 40px;
   color: #ffffff;
   height: 100vh;
 

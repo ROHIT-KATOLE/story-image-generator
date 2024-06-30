@@ -2,7 +2,8 @@ import React from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import AnimatedButton from '../components/AnimatedButton';
-import videoBg from '../assets/Gura Yuri Camp.mp4'; // Your video file path
+// import videoBg from '../assets/Gura Yuri Camp.mp4'; // Your video file path
+import backgroundGif from '../assets/Spiderman.gif';
 
 const fadeIn = keyframes`
   from {
@@ -21,6 +22,7 @@ const HomeWrapper = styled.div`
   justify-content: center;
   text-align: center;
   padding: 20px;
+  padding-top: 80px;
   min-height: 100vh; /* Minimum viewport height */
   color: #ffffff;
   overflow: hidden; /* Hide overflow to prevent scroll bars */
@@ -28,6 +30,7 @@ const HomeWrapper = styled.div`
 
   @media (max-width: 768px) {
     padding: 10px;
+    padding-top: 80px;
   }
 `;
 
@@ -52,27 +55,40 @@ const Description = styled.p`
   }
 `;
 
-const VideoBackground = styled.video`
+const VideoBackground = styled.img`
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  min-width: 100%;
-  min-height: 100%;
-  width: auto;
-  height: auto;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   z-index: -1;
+  filter: blur(10px);
+  animation: ${fadeIn} 1.5s ease-in-out;
 `;
+
+// const VideoBackground = styled.video`
+//   position: absolute;
+//   top: 50%;
+//   left: 50%;
+//   transform: translate(-50%, -50%);
+//   min-width: 100%;
+//   min-height: 100%;
+//   width: auto;
+//   height: auto;
+//   z-index: -1;
+// `;
 
 const Home = () => {
   const navigate = useNavigate();
 
   return (
     <HomeWrapper>
-      <VideoBackground autoPlay loop muted>
+      <VideoBackground src={backgroundGif} alt="Background GIF" />
+      {/* <VideoBackground autoPlay loop muted>
         <source src={videoBg} type="video/mp4" />
         Your browser does not support the video tag.
-      </VideoBackground>
+      </VideoBackground> */}
       <Title>Welcome to the Interactive Story Generator!</Title>
       <Description>
         Create your own stories and see them come to life with AI-generated images. Whether you're a gamer or a creative writer, our tool provides a fun and engaging way to bring your ideas to life.
