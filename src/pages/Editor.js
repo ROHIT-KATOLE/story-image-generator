@@ -168,12 +168,9 @@ const Editor = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (currentUser) {
-        const fetchedData = await fetchStory(currentUser.uid);
-        if (fetchedData) {
-          setStory(fetchedData.story || '');
-          setImageUrls(fetchedData.images || []);
-          setCurrentImageIndex(0); // Reset to the first image
-        }
+        const { story: fetchedStory, images: fetchedImages } = await fetchStory(currentUser.uid);
+        setStory(fetchedStory || '');
+        setImageUrls(fetchedImages || []);
       }
     };
     fetchUserData();
@@ -208,7 +205,7 @@ const Editor = () => {
         body: JSON.stringify({ story: updatedStory }),
       });
       const data = await response.json();
-      const newStory = `${updatedStory}\n\n${data.story}`;
+      const newStory = `${updatedStory}\n\nAssistant:\n${data.story}`;
       setStory(newStory);
       await saveStory(currentUser.uid, newStory, imageUrls);
     } catch (error) {

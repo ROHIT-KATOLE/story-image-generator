@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { fetchAllStories } from '../firebase';
 import StoryCard from '../components/StoryCard';
-import StoryDetail from '../components/StoryDetail';
+import StoryBookModal from '../components/StoryBookModal';
 import { useAuth } from '../contexts/AuthContext';
 
 const StoriesContainer = styled.div`
@@ -57,12 +57,8 @@ const StoriesPage = () => {
           <StoryCard key={story.id} story={story} onClick={() => openModal(story)} />
         ))}
       </StoryCardsWrapper>
-      {selectedStory && (
-        <StoryDetail
-          story={selectedStory}
-          isOpen={modalIsOpen}
-          onClose={closeModal}
-        />
+      {selectedStory && modalIsOpen && (
+        <StoryBookModal story={selectedStory} onClose={closeModal} />
       )}
     </StoriesContainer>
   );

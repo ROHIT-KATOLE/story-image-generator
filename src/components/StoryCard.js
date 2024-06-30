@@ -38,5 +38,4 @@ const StoryCard = ({ story, onClick }) => (
   </Card>
 );
 
-
 export default StoryCard;
