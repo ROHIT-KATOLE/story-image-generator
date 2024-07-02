@@ -9,7 +9,7 @@ import {
 } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -111,106 +111,41 @@ const saveNewStory = async (userId, title, storyContent, imageUrls) => {
   try {
     const newStoryId = Date.now().toString();
     
+    // Ensure the first entry has the role 'User'
+    const updatedStoryContent = [{ role: "User", content: storyContent[0].content }, ...storyContent.slice(1)];
+
     // Save the story and title in JSON format to Firebase Storage
     const storyData = {
       title: title || `Story-${newStoryId}`,
-      story: storyContent
+      story: updatedStoryContent
     };
     const storyJsonBlob = new Blob([JSON.stringify(storyData)], { type: 'application/json' });
-    const storyJsonRef = ref(storage, `stories/${userId}/${newStoryId}/story.json`);
-    await uploadBytes(storyJsonRef, storyJsonBlob);
-    const storyJsonURL = await getDownloadURL(storyJsonRef);
-    console.log("Story JSON saved successfully");
+    const storyRef = ref(storage, `${userId}/stories/${newStoryId}/${newStoryId}.json`);
+    await uploadBytes(storyRef, storyJsonBlob);
 
-    // Save new story details in Firestore with story JSON URL
-    const userDocRef = doc(db, "users", userId);
-    const userDoc = await getDoc(userDocRef);
-    const stories = userDoc.exists() && userDoc.data().stories ? userDoc.data().stories : [];
+    // Save the images associated with the story to Firebase Storage
+    for (let i = 0; i < imageUrls.length; i++) {
+      const imageUrl = imageUrls[i];
+      const imageRef = ref(storage, `${userId}/images/${newStoryId}/${i}.jpg`);
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      await uploadBytes(imageRef, blob);
+    }
 
-    const newStory = {
-      id: newStoryId,
+    // Save the story metadata to Firestore
+    const storyMetadata = {
       title: title || `Story-${newStoryId}`,
-      storyJsonURL,
-      images: [],
+      storyId: newStoryId,
       createdAt: new Date(),
     };
-
-    stories.push(newStory);
-    await updateDoc(userDocRef, { stories });
-
-    // Save images
-    for (const imageUrl of imageUrls) {
-      await saveImage(userId, imageUrl, newStoryId);
-    }
-
-    console.log("New story saved successfully");
-  } catch (error) {
-    console.error("Error saving new story:", error);
-    throw error;
-  }
-};
-
-// Save image to Firebase Storage and Firestore
-const saveImage = async (userId, imageUrl, storyId) => {
-  try {
-    const imageRef = ref(storage, `images/${userId}/${storyId}/${Date.now()}.jpg`);
-    const response = await fetch(imageUrl);
-    const blob = await response.blob();
-    await uploadBytes(imageRef, blob);
-    const downloadURL = await getDownloadURL(imageRef);
-
-    const userDocRef = doc(db, "users", userId);
+    const userDocRef = doc(db, 'users', userId);
     const userDoc = await getDoc(userDocRef);
     const userData = userDoc.exists() ? userDoc.data() : {};
-
     const stories = userData.stories || [];
-    const storyIndex = stories.findIndex(story => story.id === storyId);
-
-    if (storyIndex !== -1) {
-      stories[storyIndex].images = stories[storyIndex].images || [];
-      stories[storyIndex].images.push(downloadURL);
-      await updateDoc(userDocRef, { stories });
-      console.log("Image URL saved in Firestore");
-    } else {
-      console.error("Story not found");
-    }
+    stories.push(storyMetadata);
+    await updateDoc(userDocRef, { stories });
   } catch (error) {
-    console.error("Error saving image:", error);
-    throw error;
-  }
-};
-
-// Fetch images for a story
-const fetchImages = async (userId, storyId) => {
-  try {
-    const userDocRef = doc(db, "users", userId);
-    const userDoc = await getDoc(userDocRef);
-    if (userDoc.exists()) {
-      const stories = userDoc.data().stories || [];
-      const story = stories.find(story => story.id === storyId);
-      return story ? story.images : [];
-    }
-    return [];
-  } catch (error) {
-    console.error("Error fetching images:", error);
-    throw error;
-  }
-};
-
-// Fetch a story from JSON file in storage
-const fetchStoryFromStorage = async (userId, storyId) => {
-  if (!storyId) {
-    throw new Error('Story ID is required to fetch story from storage');
-  }
-  try {
-    const storyJsonRef = ref(storage, `stories/${userId}/${storyId}/story.json`);
-    const storyJsonURL = await getDownloadURL(storyJsonRef);
-    const response = await fetch(storyJsonURL);
-    const storyData = await response.json();
-    return storyData;
-  } catch (error) {
-    console.error("Error fetching story from storage:", error);
-    throw error;
+    console.error('Error saving new story:', error);
   }
 };
 
@@ -219,13 +154,45 @@ const fetchAllStories = async (userId) => {
   try {
     const userDocRef = doc(db, "users", userId);
     const userDoc = await getDoc(userDocRef);
-    if (userDoc.exists()) {
-      return userDoc.data().stories || [];
+    if (!userDoc.exists()) {
+      return [];
     }
-    return [];
+    
+    const userData = userDoc.data();
+    const stories = userData.stories || [];
+    
+    const fetchedStories = [];
+
+    for (const story of stories) {
+      const storyRef = ref(storage, `${userId}/stories/${story.storyId}/${story.storyId}.json`);
+      try {
+        const storyUrl = await getDownloadURL(storyRef);
+        const response = await fetch(storyUrl);
+        const storyData = await response.json();
+        const imageUrls = await fetchImageUrls(userId, story.storyId);
+        fetchedStories.push({ id: story.storyId, ...storyData, images: imageUrls });
+      } catch (error) {
+        console.error(`Error fetching story ${story.storyId}:`, error);
+      }
+    }
+
+    return fetchedStories;
   } catch (error) {
     console.error("Error fetching all stories:", error);
     throw error;
+  }
+};
+
+// Fetch image URLs for a specific story
+const fetchImageUrls = async (userId, storyId) => {
+  try {
+    const imagesRef = ref(storage, `${userId}/images/${storyId}`);
+    const imagesList = await listAll(imagesRef);
+    const imageUrls = await Promise.all(imagesList.items.map(item => getDownloadURL(item)));
+    return imageUrls;
+  } catch (error) {
+    console.error("Error fetching image URLs:", error);
+    return [];
   }
 };
 
@@ -258,8 +225,5 @@ export {
   saveStory, 
   fetchStory, 
   saveNewStory, 
-  fetchAllStories, 
-  saveImage, 
-  fetchImages,
-  fetchStoryFromStorage
+  fetchAllStories 
 };

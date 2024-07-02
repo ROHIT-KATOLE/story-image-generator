@@ -3,7 +3,7 @@ import styled, { keyframes } from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import AnimatedButton from '../components/AnimatedButton';
 // import videoBg from '../assets/Gura Yuri Camp.mp4'; // Your video file path
-import backgroundGif from '../assets/Spiderman.gif';
+import backgroundGif from '../assets/preview.gif';
 
 const fadeIn = keyframes`
   from {
@@ -57,13 +57,14 @@ const Description = styled.p`
 
 const VideoBackground = styled.img`
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 100%;
   height: 100%;
   object-fit: cover;
   z-index: -1;
-  filter: blur(10px);
+  filter: blur(5px);
   animation: ${fadeIn} 1.5s ease-in-out;
 `;
 

@@ -13,7 +13,7 @@ const customStyles = {
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)',
     width: '80%',
-    height: '100%',
+    height: '90%',
     padding: '0',
     borderRadius: '8px',
     overflow: 'hidden',
@@ -29,9 +29,9 @@ const CloseButton = styled.button`
   right: 10px;
   background: transparent;
   border: none;
-  font-size: 1.5em;
+  font-size: 3em;
   cursor: pointer;
-  color: #fff;
+  color: black;
 `;
 
 const StoryBookModal = ({ story, onClose }) => {
@@ -49,3 +49,4 @@ const StoryBookModal = ({ story, onClose }) => {
 };
 
 export default StoryBookModal;
+

@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const StoriesContainer = styled.div`
   padding: 20px;
+  padding-top: 80px;
   color: #ffffff;
   background-color: #282c34;
   min-height: 100vh;

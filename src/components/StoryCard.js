@@ -25,17 +25,11 @@ const StoryTitle = styled.h2`
 const StoryCard = ({ story, onClick }) => (
   <Card onClick={onClick}>
     {story.images && story.images.length > 0 && (
-      <Thumbnail
-        srcSet={`
-          ${story.images[0]} 480w
-        `}
-        sizes="(max-width: 600px) 480px, 800px"
-        src={story.images[0]}
-        alt={`Story ${story.id} thumbnail`}
-      />
+      <Thumbnail src={story.images[0]} alt={`Story ${story.id} thumbnail`} />
     )}
     <StoryTitle>{story.title}</StoryTitle>
   </Card>
 );
 
 export default StoryCard;
+

@@ -156,8 +156,9 @@ const EditorWrapper = styled.div`
 
 const Editor = () => {
   const { currentUser } = useAuth();
-  const [story, setStory] = useState('');
+  const [storyData, setStoryData] = useState([]);
   const [title, setTitle] = useState('');
+  const [initialInput, setInitialInput] = useState('');
   const [userInput, setUserInput] = useState('');
   const [initialSubmitted, setInitialSubmitted] = useState(false);
   const [imagePrompt, setImagePrompt] = useState('');
@@ -170,68 +171,76 @@ const Editor = () => {
     const fetchUserData = async () => {
       if (currentUser) {
         const { story: fetchedStory, images: fetchedImages } = await fetchStory(currentUser.uid);
-        setStory(fetchedStory || '');
+        setStoryData(fetchedStory || []);
         setImageUrls(fetchedImages || []);
+        setInitialSubmitted(fetchedStory && fetchedStory.length > 0);
       }
     };
     fetchUserData();
-  }, [currentUser]);  
+  }, [currentUser]);
 
   const handleInitialStorySubmit = async () => {
+    const initialEntry = { role: "User", content: initialInput };
+    const updatedStoryData = [initialEntry];
+
     try {
       const response = await fetch('https://swine-frank-hog.ngrok-free.app/api/generateStory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ story }),
+        body: JSON.stringify({ storyData: updatedStoryData }),
       });
       const data = await response.json();
-      const newStory = `${story}\n\nAssistant:\n${data.story}`;
-      setStory(newStory);
-      await saveStory(currentUser.uid, newStory, imageUrls);
+      const newEntry = { role: "Assistant", content: data.newResponse };
+      const newUpdatedStoryData = [...updatedStoryData, newEntry];
+      setStoryData(newUpdatedStoryData);
+      await saveStory(currentUser.uid, newUpdatedStoryData, imageUrls);
       setInitialSubmitted(true);
     } catch (error) {
       console.error('Error generating story:', error);
     }
-  };  
+  };
 
   const handleUserInputSubmit = async () => {
-    const updatedStory = `${story}\n\nUser:\n${userInput}`;
-    setStory(updatedStory);
+    const newUserEntry = { role: "User", content: userInput };
+    const updatedStoryData = [...storyData, newUserEntry];
+    setStoryData(updatedStoryData);
     setUserInput('');
-  
+
     try {
       const response = await fetch('https://swine-frank-hog.ngrok-free.app/api/generateStory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ story: updatedStory }),
+        body: JSON.stringify({ storyData: updatedStoryData, userInput }),
       });
       const data = await response.json();
-      const newStory = `${updatedStory}\n\nAssistant:\n${data.story}`;
-      setStory(newStory);
-      await saveStory(currentUser.uid, newStory, imageUrls);
+      const newEntry = { role: "Assistant", content: data.newResponse };
+      const newUpdatedStoryData = [...updatedStoryData, newEntry];
+      setStoryData(newUpdatedStoryData);
+      await saveStory(currentUser.uid, newUpdatedStoryData, imageUrls);
     } catch (error) {
       console.error('Error generating story:', error);
     }
   };
-  
 
   const handleCreateNewStory = () => {
-    setStory('');
+    setStoryData([]);
     setTitle('');
+    setInitialInput('');
     setInitialSubmitted(false);
     setImageUrls([]);
     setCurrentImageIndex(0);
   };
 
   const handleClearStory = () => {
-    setStory('');
+    setStoryData([]);
+    setInitialInput('');
     setImageUrls([]);
     setCurrentImageIndex(0);
   };
 
   const handleSaveStory = async () => {
     try {
-      await saveNewStory(currentUser.uid, title, story, imageUrls);
+      await saveNewStory(currentUser.uid, title, storyData, imageUrls);
       alert('Story saved successfully!');
     } catch (error) {
       console.error('Error saving story:', error);
@@ -260,19 +269,18 @@ const Editor = () => {
       setLoading(false);
     }
   };
-  
-  
+
   const handleNextImage = () => {
     if (imageUrls.length > 0) {
       setCurrentImageIndex((currentImageIndex + 1) % imageUrls.length);
     }
   };
-  
+
   const handlePreviousImage = () => {
     if (imageUrls.length > 0) {
       setCurrentImageIndex((currentImageIndex - 1 + imageUrls.length) % imageUrls.length);
     }
-  };  
+  };
 
   return (
     <EditorWrapper>
@@ -290,15 +298,22 @@ const Editor = () => {
               value={title}
               onChange={e => setTitle(e.target.value)}
             />
-            <textarea
-              value={story}
-              onChange={e => setStory(e.target.value)}
-              placeholder="Your story will appear here..."
-            />
             {!initialSubmitted ? (
-              <button onClick={handleInitialStorySubmit}><i className="fas fa-paper-plane"></i> Submit Initial Story</button>
+              <>
+                <textarea
+                  value={initialInput}
+                  onChange={e => setInitialInput(e.target.value)}
+                  placeholder="Type your initial input..."
+                />
+                <button onClick={handleInitialStorySubmit}><i className="fas fa-paper-plane"></i> Submit Initial Input</button>
+              </>
             ) : (
               <>
+                <textarea
+                  value={storyData.map(entry => `${entry.role}: ${entry.content}`).join('\n\n')}
+                  readOnly
+                  placeholder="Your story will appear here..."
+                />
                 <textarea
                   value={userInput}
                   onChange={e => setUserInput(e.target.value)}

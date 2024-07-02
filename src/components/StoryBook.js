@@ -17,6 +17,7 @@ const PageContainer = styled.div`
 
 const PageTitle = styled.h2`
   font-size: 1.5em;
+  font-weight: bold;
   color: #333;
   margin-bottom: 10px;
 `;
@@ -34,12 +35,21 @@ const PageImage = styled.img`
   margin-top: 10px;
 `;
 
+const PageNumber = styled.div`
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8em;
+  color: #666;
+`;
+
 const Page = React.forwardRef(({ number, title, content, image }, ref) => (
   <PageContainer ref={ref}>
     {number === 1 && <PageTitle>{title}</PageTitle>}
     {number !== 1 && image && <PageImage src={image} alt={`Page ${number}`} />}
-    {number !== 1 && <PageContent>{content}</PageContent>}
-    <PageContent>Page number: {number}</PageContent>
+    <PageContent>{content}</PageContent>
+    <PageNumber>{number}</PageNumber>
   </PageContainer>
 ));
 
@@ -49,58 +59,39 @@ const StoryBookWrapper = styled.div`
   align-items: center;
 `;
 
-const NavigationButtons = styled.div`
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 320px;
-  margin: 10px;
-`;
-
-const NavigationButton = styled.button`
-  margin: 10px;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  &:hover {
-    background-color: #0056b3;
-  }
-`;
-
 const StoryBook = ({ story }) => {
   const book = useRef();
-  const storyParts = story.content.split('\n');
+  const storyParts = story.story || [];
+
+  const pages = [];
+  // Add the first page with title
+  pages.push({ number: 1, content: <PageTitle>{story.title}</PageTitle> });
+
+  // Add the second page with the first piece of content
+  if (storyParts.length > 0) {
+    pages.push({ number: 2, content: storyParts[0].content });
+  }
+
+  // Combine content from the third page onwards
+  for (let i = 1; i < storyParts.length; i += 2) {
+    const combinedContent = storyParts.slice(i, i + 2).map(part => part.content).join('\n');
+    pages.push({ number: pages.length + 1, content: combinedContent });
+  }
 
   return (
     <StoryBookWrapper>
-      <NavigationButtons>
-        <NavigationButton onClick={() => book.current.pageFlip().flipPrev()}>
-          Previous
-        </NavigationButton>
-        <NavigationButton onClick={() => book.current.pageFlip().flipNext()}>
-          Next
-        </NavigationButton>
-      </NavigationButtons>
       <HTMLFlipBook
         width={400}
         height={600}
         ref={book}
         style={{ margin: '20px auto' }}
       >
-        <Page
-          key={1}
-          number={1}
-          title={story.title}
-        />
-        {storyParts.map((part, index) => (
+        {pages.map((page, index) => (
           <Page
-            key={index + 2}
-            number={index + 2}
-            content={part.trim()}
-            image={story.images[index]}
+            key={index + 1}
+            number={index + 1}
+            content={page.content}
+            image={story.images && story.images[index - 1]}
           />
         ))}
       </HTMLFlipBook>
