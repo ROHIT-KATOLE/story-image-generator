@@ -19,6 +19,14 @@
 .env.test.local
 .env.production.local
 
+
+.firebase.json
+.firebaserc
+.firestore.rules
+.firestore.indexes.json
+.storage.rules
+
+
 # cache
 .cache
 

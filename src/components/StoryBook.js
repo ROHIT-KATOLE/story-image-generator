@@ -2,9 +2,28 @@
 import React, { useRef } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import styled from 'styled-components';
+import coverImage from '../assets/1.png'; // Add your cover image
+import pageTexture from '../assets/2.png'; // Add your page texture
+
+const CoverPageContainer = styled.div`
+  background-image: url(${coverImage});
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Arial', sans-serif;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 20px;
+  color: #ffffff;
+`;
 
 const PageContainer = styled.div`
-  background-color: white;
+  background-image: url(${pageTexture});
+  background-size: cover;
+  background-position: center;
   border: 1px solid #ccc;
   box-shadow: 0px 0px 5px #aaa;
   padding: 20px;
@@ -16,17 +35,24 @@ const PageContainer = styled.div`
 `;
 
 const PageTitle = styled.h2`
-  font-size: 1.5em;
+  font-size: 2em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   font-weight: bold;
-  color: #333;
-  margin-bottom: 10px;
+  color: #fff;
+  text-align: center;
+  margin: 0;
 `;
 
 const PageContent = styled.p`
   font-size: 1em;
+  font-family: 'Bradley Hand', cursive;
   line-height: 1.5;
   color: #333;
   overflow-y: auto;
+  white-space: pre-wrap;
 `;
 
 const PageImage = styled.img`
@@ -45,12 +71,17 @@ const PageNumber = styled.div`
 `;
 
 const Page = React.forwardRef(({ number, title, content, image }, ref) => (
-  <PageContainer ref={ref}>
-    {number === 1 && <PageTitle>{title}</PageTitle>}
-    {number !== 1 && image && <PageImage src={image} alt={`Page ${number}`} />}
-    <PageContent>{content}</PageContent>
-    <PageNumber>{number}</PageNumber>
-  </PageContainer>
+  number === 1 ? (
+    <CoverPageContainer ref={ref}>
+      <PageTitle>{title}</PageTitle>
+    </CoverPageContainer>
+  ) : (
+    <PageContainer ref={ref}>
+      {image && <PageImage src={image} alt={`Page ${number}`} />}
+      <PageContent dangerouslySetInnerHTML={{ __html: content }} />
+      <PageNumber>{number}</PageNumber>
+    </PageContainer>
+  )
 ));
 
 const StoryBookWrapper = styled.div`
@@ -65,7 +96,7 @@ const StoryBook = ({ story }) => {
 
   const pages = [];
   // Add the first page with title
-  pages.push({ number: 1, content: <PageTitle>{story.title}</PageTitle> });
+  pages.push({ number: 1, title: story.title });
 
   // Add the second page with the first piece of content
   if (storyParts.length > 0) {
@@ -74,7 +105,7 @@ const StoryBook = ({ story }) => {
 
   // Combine content from the third page onwards
   for (let i = 1; i < storyParts.length; i += 2) {
-    const combinedContent = storyParts.slice(i, i + 2).map(part => part.content).join('\n');
+    const combinedContent = storyParts.slice(i, i + 2).map(part => part.content).join('<br /><br />');
     pages.push({ number: pages.length + 1, content: combinedContent });
   }
 
@@ -90,6 +121,7 @@ const StoryBook = ({ story }) => {
           <Page
             key={index + 1}
             number={index + 1}
+            title={page.title}
             content={page.content}
             image={story.images && story.images[index - 1]}
           />
