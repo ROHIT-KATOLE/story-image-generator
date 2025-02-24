@@ -1,170 +1,105 @@
-# Firebase Stories App
+# Interactive Story and Image Generator
 
-This project is a Firebase-based application that allows users to authenticate via Google or email and password, create and manage stories, and upload images associated with those stories. The application uses Firebase Authentication for user management, Firestore for storing user and story data, and Firebase Storage for storing images and story JSON files.
+## Overview
+The **Interactive Story and Image Generator** is a web application that allows users to generate engaging storylines and corresponding images using AI. It is designed for writers, gamers, and comic book enthusiasts who want to create immersive narratives with AI-assisted storytelling and visuals.
 
-## Table of Contents
-
-- [Firebase Stories App](#firebase-stories-app)
-  - [Table of Contents](#table-of-contents)
-  - [Features](#features)
-  - [Setup](#setup)
-    - [Prerequisites](#prerequisites)
-    - [Installation](#installation)
-  - [Usage](#usage)
-    - [Authentication](#authentication)
-    - [Story Management](#story-management)
-  - [Firebase Configuration](#firebase-configuration)
-  - [API Documentation](#api-documentation)
-  - [Contributing](#contributing)
-  
 ## Features
+### 1. Story Editor
+- Users can write and edit their own stories.
+- AI-powered text generation using **Azure OpenAI's GPT-4-Turbo**.
+- Ability to save and retrieve stories using **Firebase Firestore**.
 
-- User Authentication with Google and Email/Password
-- User Registration
-- Create and Save Stories with Titles and Content
-- Upload and Fetch Images Associated with Stories
-- Store Stories and Images in Firebase Storage
-- Fetch All Stories for a User
+### 2. Image Generator
+- AI-based image generation from text prompts using **Azure OpenAI's DALL-E**.
+- Users can download and save generated images.
+- Images are stored securely in **Firebase Storage**.
 
-## Setup
+### 3. User Authentication
+- Google Authentication and Email/Password login using **Firebase Auth**.
+- Secure user sessions with token-based authentication.
 
+### 4. Cloud-Based Backend
+- Firebase Functions handle AI requests to Azure OpenAI.
+- Firestore is used to store user stories and metadata.
+- Firebase Storage for saving generated images.
+
+## Tech Stack
+### Frontend
+- **React.js** (UI framework)
+- **Tailwind CSS** (Styling)
+- **Axios** (API requests)
+
+### Backend
+- **Firebase Functions** (Serverless backend)
+- **Firestore** (NoSQL Database for user stories)
+- **Firebase Storage** (For saving images)
+
+### AI Integration
+- **Azure OpenAI GPT-4-Turbo** (For text/story generation)
+- **Azure OpenAI DALL-E** (For AI-generated images)
+
+## Installation and Setup
 ### Prerequisites
+- Node.js (v16 or v18+ required for Firebase Functions)
+- Firebase CLI
+- A Firebase Project with Firestore and Storage enabled
+- An Azure OpenAI subscription
 
-- Node.js and npm installed
-- Firebase project setup
+### Steps to Set Up the Project
+1. **Clone the Repository**
+   ```sh
+   git clone https://github.com/yourusername/your-repo.git
+   cd your-repo
+   ```
 
-### Installation
+2. **Install Dependencies**
+   ```sh
+   npm install
+   ```
 
-1. Clone the repository:
+3. **Set Up Firebase**
+   - Initialize Firebase in the project:
+     ```sh
+     firebase init
+     ```
+   - Choose **Firestore, Functions, and Hosting** during setup.
+   - Set up `.env` file with your Firebase and Azure OpenAI credentials.
 
-    ```bash
-    git clone https://github.com/your-username/story-image-generator.git
-    cd story-image-generator
-    ```
+4. **Deploy Firebase Functions**
+   ```sh
+   cd functions
+   npm install
+   firebase deploy --only functions
+   ```
 
-2. Install dependencies:
-
-    ```bash
-    npm install
-    ```
-
-3. Configure Firebase:
-
-    - Create a `.env` file in the root of your project.
-    - Add your Firebase configuration to the `.env` file.
-
-    ```plaintext
-    REACT_APP_FIREBASE_API_KEY=your-api-key
-    REACT_APP_FIREBASE_AUTH_DOMAIN=your-auth-domain
-    REACT_APP_FIREBASE_PROJECT_ID=your-project-id
-    REACT_APP_FIREBASE_STORAGE_BUCKET=your-storage-bucket
-    REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
-    REACT_APP_FIREBASE_APP_ID=your-app-id
-    REACT_APP_FIREBASE_MEASUREMENT_ID=your-measurement-id
-    ```
-
-4. Start the development server:
-
-    ```bash
-    npm start
-    ```
+5. **Run the Development Server**
+   ```sh
+   npm start
+   ```
 
 ## Usage
+- Sign up or log in using Google or email/password.
+- Navigate to the **Story Editor** to create a story.
+- Click **Generate Story** to use AI-powered writing assistance.
+- Switch to **Image Generator** to create images based on story descriptions.
+- Save stories and images to your account.
 
-### Authentication
-
-- **Sign in with Google:**
-```javascript
-  import { signInWithGoogle } from './firebase';
-
-  const user = await signInWithGoogle();
-  console.log(user);
+## API Endpoints
+### Story Generation
+```
+POST https://<your-firebase-project-id>.cloudfunctions.net/generateStory
+Body: { "prompt": "Your story idea here" }
+Response: { "story": "Generated AI text" }
 ```
 
-- **Register with Email and Password:**
-```javascript
-import { registerWithEmailAndPassword } from './firebase';
-
-const user = await registerWithEmailAndPassword(email, password, username);
-console.log(user);
+### Image Generation
+```
+POST https://<your-firebase-project-id>.cloudfunctions.net/generateImage
+Body: { "prompt": "Your image description here" }
+Response: { "image": "Generated image URL" }
 ```
 
-- **Login with Email and Password:**
-```javascript
-import { loginWithEmailAndPassword } from './firebase';
-
-const user = await loginWithEmailAndPassword(email, password);
-console.log(user);
-```
-
-- **Logout:**
-```javascript
-import { logout } from './firebase';
-
-await logout();
-console.log('User logged out');
-```
-
-### Story Management
-- **Save a Story:**
-```javascript
-import { saveStory } from './firebase';
-
-await saveStory(userId, storyContent, imageUrl);
-console.log('Story saved successfully');
-```
-
-- **Save a New Story:**
-```javascript
-import { saveNewStory } from './firebase';
-
-await saveNewStory(userId, title, storyContent, imageUrls);
-console.log('New story saved successfully');
-```
-
-- **Fetch Images for a Story:**
-```javascript
-import { fetchImages } from './firebase';
-
-const images = await fetchImages(userId, storyId);
-console.log(images);
-```
-
-- **Fetch a Story from Storage:**
-```javascript
-import { fetchStoryFromStorage } from './firebase';
-
-const story = await fetchStoryFromStorage(userId, storyId);
-console.log(story);
-```
-
-- **Fetch All Stories for a User:**
-```javascript
-import { fetchAllStories } from './firebase';
-
-const stories = await fetchAllStories(userId);
-console.log(stories);
-```
-
-
-
-## Firebase Configuration
-Make sure to configure Firebase with your project details as shown in the Installation section.
-
-
-
-## API Documentation
-The following Firebase functions are available:
-
-- signInWithGoogle(): Sign in with Google.
-- registerWithEmailAndPassword(email, password, username): Register a new user with email and password.
-- loginWithEmailAndPassword(email, password): Login with email and password.
-- logout(): Logout the current user.
-- saveStory(userId, storyContent, imageUrl): Save a story and associated images.
-- saveNewStory(userId, title, storyContent, imageUrls): Save a new story with title and content.
-- fetchImages(userId, storyId): Fetch images for a specific story.
-- fetchStoryFromStorage(userId, storyId): Fetch a story from Firebase Storage.
-- fetchAllStories(userId): Fetch all stories for a user.
-
-## Contributing
-Contributions are welcome! Please open an issue or submit a pull request.
+## Future Enhancements
+- Add multi-user collaboration.
+- Implement a **comic panel generator**.
+- Allow more **customization** of AI-generated content.
