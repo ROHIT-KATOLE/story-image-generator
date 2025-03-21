@@ -48,8 +48,8 @@ The **Interactive Story and Image Generator** is a web application that allows u
 ### Steps to Set Up the Project
 1. **Clone the Repository**
    ```sh
-   git clone https://github.com/yourusername/your-repo.git
-   cd your-repo
+   git clone https://github.com/ROHIT-KATOLE/story-image-generator
+   cd story-image-generator
    ```
 
 2. **Install Dependencies**
