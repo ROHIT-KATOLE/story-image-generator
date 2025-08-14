@@ -515,7 +515,7 @@ const Editor = () => {
       // Enhance prompt for better image generation
       const enhancedPrompt = `${imagePromptText}, fantasy art style, cinematic, detailed, atmospheric, high quality, digital art`;
 
-      const response = await fetch('https://swine-frank-hog.ngrok-free.app/api/generateImage', {
+      const response = await fetch('https://story-image-generator.onrender.com/api/generateImage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: enhancedPrompt }),
@@ -600,7 +600,7 @@ const Editor = () => {
     const initialEntry = { role: "User", content: initialInput };
     const updatedStoryData = [initialEntry];
     try {
-      const response = await fetch('https://swine-frank-hog.ngrok-free.app/api/generateStory', {
+      const response = await fetch('https://story-image-generator.onrender.com/api/generateStory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ storyData: updatedStoryData }),
@@ -632,7 +632,7 @@ const Editor = () => {
     setStoryData(updatedStoryData);
     setUserInput('');
     try {
-      const response = await fetch('https://swine-frank-hog.ngrok-free.app/api/generateStory', {
+      const response = await fetch('https://story-image-generator.onrender.com/api/generateStory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ storyData: updatedStoryData, userInput: inputToSend }),
@@ -658,7 +658,7 @@ const Editor = () => {
     setImageLoading(true);
     setError('');
     try {
-      const response = await fetch('https://swine-frank-hog.ngrok-free.app/api/generateImage', {
+      const response = await fetch('https://story-image-generator.onrender.com/api/generateImage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: imagePrompt }),
