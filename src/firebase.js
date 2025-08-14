@@ -1,15 +1,15 @@
-import { 
-  getAuth, 
-  signInWithPopup, 
-  GoogleAuthProvider, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  updateProfile, 
-  signOut 
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  updateProfile
 } from 'firebase/auth';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage';
+import {initializeApp} from 'firebase/app';
+import {doc, getDoc, getFirestore, setDoc, updateDoc} from 'firebase/firestore';
+import {getDownloadURL, getStorage, listAll, ref, uploadBytes} from 'firebase/storage';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -35,13 +35,34 @@ const signInWithGoogle = async () => {
     const result = await signInWithPopup(auth, provider);
     const userDocRef = doc(db, 'users', result.user.uid);
     const userDocSnapshot = await getDoc(userDocRef);
+
     if (!userDocSnapshot.exists()) {
+      // Create new user document with both displayName and username
       await setDoc(userDocRef, {
         email: result.user.email,
         displayName: result.user.displayName || '',
+        username: result.user.displayName || '', // Add username field with same value as displayName
         createdAt: new Date()
       });
+
+      // Also store in usernames collection for lookup
+      if (result.user.displayName) {
+        await setDoc(doc(db, "usernames", result.user.displayName.toLowerCase()), { uid: result.user.uid });
+      }
+    } else {
+      // Check if existing user has username field, if not, update it
+      const userData = userDocSnapshot.data();
+      if (!userData.username && userData.displayName) {
+        await updateDoc(userDocRef, {
+          username: userData.displayName
+        });
+
+        // Also ensure username is in the usernames collection
+        await setDoc(doc(db, "usernames", userData.displayName.toLowerCase()), { uid: result.user.uid });
+        console.log(`Updated existing Google user ${userData.displayName} to have username field`);
+      }
     }
+
     return result.user;
   } catch (error) {
     console.error("Error signing in with Google:", error.message);
@@ -52,15 +73,25 @@ const signInWithGoogle = async () => {
 // Register with email and password
 const registerWithEmailAndPassword = async (email, password, username) => {
   try {
+    // Validate that the username doesn't already exist
+    const usernameDoc = await getDoc(doc(db, "usernames", username.toLowerCase()));
+    if (usernameDoc.exists()) {
+      throw new Error("Username is already taken.");
+    }
+
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(userCredential.user, {
-      displayName: username,
-    });
+
+    // Update profile and Firestore
+    await updateProfile(userCredential.user, { displayName: username });
     await setDoc(doc(db, "users", userCredential.user.uid), {
-      email: email,
-      username: username,
-      createdAt: new Date()
+      email,
+      username,
+      createdAt: new Date(),
     });
+
+    // Store the username in a separate Firestore collection for uniqueness
+    await setDoc(doc(db, "usernames", username.toLowerCase()), { uid: userCredential.user.uid });
+
     return userCredential.user;
   } catch (error) {
     console.error("Error registering:", error.message);
@@ -110,7 +141,7 @@ const saveStory = async (userId, storyContent, imageUrl) => {
 const saveNewStory = async (userId, title, storyContent, imageUrls) => {
   try {
     const newStoryId = Date.now().toString();
-    
+
     // Ensure the first entry has the role 'User'
     const updatedStoryContent = [{ role: "User", content: storyContent[0].content }, ...storyContent.slice(1)];
 
@@ -157,10 +188,10 @@ const fetchAllStories = async (userId) => {
     if (!userDoc.exists()) {
       return [];
     }
-    
+
     const userData = userDoc.data();
     const stories = userData.stories || [];
-    
+
     const fetchedStories = [];
 
     for (const story of stories) {
@@ -188,8 +219,7 @@ const fetchImageUrls = async (userId, storyId) => {
   try {
     const imagesRef = ref(storage, `${userId}/images/${storyId}`);
     const imagesList = await listAll(imagesRef);
-    const imageUrls = await Promise.all(imagesList.items.map(item => getDownloadURL(item)));
-    return imageUrls;
+    return await Promise.all(imagesList.items.map(item => getDownloadURL(item)));
   } catch (error) {
     console.error("Error fetching image URLs:", error);
     return [];

@@ -49,4 +49,3 @@ const StoryBookModal = ({ story, onClose }) => {
 };
 
 export default StoryBookModal;
-

@@ -6,7 +6,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(express.json());
-const allowedOrigins = ['http://localhost:3000', 'https://www.makestory.me'];
+const allowedOrigins = ['http://localhost:3000', 'https://www.makestory.me', 'https://story-book-generator-kappa.vercel.app'];
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -66,7 +66,7 @@ app.post('/api/generateImage', async (req, res) => {
     const n = 1;
 
     const client = new OpenAIClient(endpoint, new AzureKeyCredential(apiKey));
-    const deploymentName = "dalle3"; // Make sure this matches your deployment
+    const deploymentName = "dall-e-3"; // Make sure this matches your deployment
 
     try {
         const results = await client.getImages(deploymentName, prompt, { n, size });
