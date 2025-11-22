@@ -51,7 +51,7 @@ Continue the story in an engaging and interactive manner, providing responses th
 
     try {
         const client = new OpenAIClient(endpoint, new AzureKeyCredential(apiKey));
-        const result = await client.getCompletions(model, [prompt], { maxTokens: 150, temperature: 0.7, topP: 1, frequencyPenalty: 0.5, presencePenalty: 0.5 });
+        const result = await client.getChatCompletions(model, [prompt], { maxTokens: 150, temperature: 0.7, topP: 1, frequencyPenalty: 0.5, presencePenalty: 0.5 });
         const newResponse = result.choices[0]?.text.trim();
         res.json({ newResponse });
     } catch (err) {
