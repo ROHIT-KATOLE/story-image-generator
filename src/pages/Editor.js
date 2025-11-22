@@ -536,6 +536,11 @@ const Editor = () => {
 
   // Function to render text with clickable choices
   const renderTextWithChoices = (text, onChoiceClick) => {
+    if (!text || typeof text !== "string") {
+      console.error("⚠ renderTextWithChoices received invalid text:", text);
+      return <span></span>;
+    }
+  
     const choiceRegex = /\(([^)]+)\)/g;
     const matches = [...text.matchAll(choiceRegex)];
 
@@ -606,7 +611,16 @@ const Editor = () => {
         body: JSON.stringify({ storyData: updatedStoryData }),
       });
       const data = await response.json();
-      const newEntry = { role: "Assistant", content: data.newResponse };
+      const assistantContent = data?.newResponse;
+
+      if (!assistantContent || typeof assistantContent !== "string") {
+        console.error("⚠️ Invalid assistant response:", assistantContent);
+        setError("The story generator returned an invalid response. Try again.");
+        setLoading(false);
+        return; // IMPORTANT: stop execution
+      }
+
+      const newEntry = { role: "Assistant", content: assistantContent };
       const newUpdatedStoryData = [...updatedStoryData, newEntry];
       setStoryData(newUpdatedStoryData);
       await saveStory(currentUser.uid, newUpdatedStoryData, imageUrls);
@@ -638,7 +652,16 @@ const Editor = () => {
         body: JSON.stringify({ storyData: updatedStoryData, userInput: inputToSend }),
       });
       const data = await response.json();
-      const newEntry = { role: "Assistant", content: data.newResponse };
+      const assistantContent = data?.newResponse;
+
+      if (!assistantContent || typeof assistantContent !== "string") {
+        console.error("⚠️ Invalid assistant response:", assistantContent);
+        setError("The story generator returned an invalid response. Try again.");
+        setLoading(false);
+        return; // IMPORTANT: stop execution
+      }
+      
+      const newEntry = { role: "Assistant", content: assistantContent };
       const newUpdatedStoryData = [...updatedStoryData, newEntry];
       setStoryData(newUpdatedStoryData);
       await saveStory(currentUser.uid, newUpdatedStoryData, imageUrls);
