@@ -32,7 +32,12 @@ if (!endpoint || !apiKey || !model) {
 app.post('/api/generateStory', async (req, res) => {
     const { storyData, userInput } = req.body;
 
-    let prompt = `You are an interactive storytelling assistant. You help users continue their stories by suggesting the next line and involving them in the story with dialogs, questions, and suspenseful elements. Your goal is to make the story feel immersive and interactive, keeping the user engaged. Use the input and context provided to generate a response that seamlessly continues the story.
+    // Build the system prompt (instructions)
+    const systemPrompt =`
+You are an interactive storytelling assistant.
+Continue the story based on previous messages.
+Keep responses under 3 sentences.
+Always end with choices in parentheses like (option1/option2) when appropriate.
 
 Example interactions:
 User Input: I was sitting in class when I first saw it. Miss Weaver's voice droned on, but my attention was drawn to a flicker of movement outside the window.
@@ -41,24 +46,52 @@ Assistant Response: The flicker of movement outside the window caught your eye a
 User Input: ask
 Assistant Response: You raised your hand, your heart pounding. 'Miss Weaver, may I go to the bathroom?' you asked, trying to keep your voice steady. She gave a reluctant nod. As you stepped into the hallway, you glanced back at the window. The shadowy figure was still there, watching you. Do you want to go straight outside or find a friend to come with you? (outside/friend)
 
-Now continue the story based on the following context:
-Context: ${storyData.map(entry => `${entry.role}: ${entry.content}`).join('\n')}
-Continue the story in an engaging and interactive manner, providing responses that are no more than 3 sentences long. Provide options for the user to choose from at the end of the response where appropriate. Wait for the user to input the option to move forward with the story, Do not write after the options.`;
+Continue the story engagingly and interactively.
+Don't continue after listing the choices.
+`;
 
+    // Convert previous storyData into chat messages
+    const messages = [
+        { role: "system", content: systemPrompt },
+        ...storyData.map(entry => ({
+            role: entry.role.toLowerCase(),
+            content: entry.content
+        }))
+    ];
+
+    // If user provided a new input, append it
     if (userInput) {
-        prompt += `\nUser Input: ${userInput}\nAssistant Response:`;
+        messages.push({ role: "user", content: userInput });
     }
 
     try {
         const client = new OpenAIClient(endpoint, new AzureKeyCredential(apiKey));
-        const result = await client.getChatCompletions(model, [prompt], { maxTokens: 150, temperature: 0.7, topP: 1, frequencyPenalty: 0.5, presencePenalty: 0.5 });
-        const newResponse = result.choices[0]?.text.trim();
+
+        // IMPORTANT: Chat Completions for GPT-4.1 / GPT-4o
+        const result = await client.getChatCompletions(model, {
+            messages,
+            maxTokens: 150,
+            temperature: 0.7,
+            topP: 1,
+            frequencyPenalty: 0.5,
+            presencePenalty: 0.5
+        });
+
+        const newResponse = result.choices?.[0]?.message?.content?.trim();
+
+        if (!newResponse) {
+            console.error("⚠ Azure returned empty response:", result);
+            return res.status(500).json({ error: "Empty response from Azure model" });
+        }
+
         res.json({ newResponse });
+
     } catch (err) {
-        console.error("Error generating story:", err.message || err);
+        console.error("Error generating story:", err.response?.data || err.message || err);
         res.status(500).json({ error: "Failed to generate story" });
     }
 });
+
 
 app.post('/api/generateImage', async (req, res) => {
     const { prompt } = req.body;
