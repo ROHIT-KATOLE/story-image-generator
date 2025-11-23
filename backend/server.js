@@ -69,13 +69,14 @@ Don't continue after listing the choices.
 
         // IMPORTANT: Chat Completions for GPT-4.1 / GPT-4o
         const result = await client.getChatCompletions(model, {
-            messages,
-            maxTokens: 150,
+            messages: messages,
+            max_tokens: 150,
             temperature: 0.7,
-            topP: 1,
-            frequencyPenalty: 0.5,
-            presencePenalty: 0.5
+            top_p: 1,
+            frequency_penalty: 0.5,
+            presence_penalty: 0.5
         });
+
 
         const newResponse = result.choices?.[0]?.message?.content?.trim();
 
